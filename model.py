@@ -17,7 +17,7 @@
 
     Description: This file contains several functions used to abstract aspects
     of model interaction within the API. This includes loading a model from
-    file, data preprocessing, and model prediction.  
+    file, data preprocessing, and model prediction.
 
 """
 
@@ -44,10 +44,36 @@ def _preprocess_data(data):
     Pandas DataFrame : <class 'pandas.core.frame.DataFrame'>
         The preprocessed data, ready to be used our model for prediction.
     """
-    # Convert the json string to a python dictionary object
     feature_vector_dict = json.loads(data)
     # Load the dictionary as a Pandas DataFrame.
     feature_vector_df = pd.DataFrame.from_dict([feature_vector_dict])
+
+    df_new = feature_vector_df
+
+    df_new['Valencia_pressure'] = df_new['Valencia_pressure'].fillna(df_new['Valencia_pressure'].mean())
+
+    df_new['Year']  = df_new['time'].astype('datetime64').dt.year
+    df_new['Month_of_year']  = df_new['time'].astype('datetime64').dt.month
+    df_new['Week_of_year'] = df_new['time'].astype('datetime64').dt.weekofyear
+    df_new['Day_of_year']  = df_new['time'].astype('datetime64').dt.dayofyear
+    df_new['Day_of_month']  = df_new['time'].astype('datetime64').dt.day
+    df_new['Day_of_week'] = df_new['time'].astype('datetime64').dt.dayofweek
+    df_new['Hour_of_week'] = ((df_new['time'].astype('datetime64').dt.dayofweek) * 24 + 24) - (24 - df_new['time'].astype('datetime64').dt.hour)
+    df_new['Hour_of_day']  = df_new['time'].astype('datetime64').dt.hour
+
+    df_new.time = pd.to_datetime(df_new.time)
+
+    df_new.Valencia_wind_deg = df_new.Valencia_wind_deg.str.extract('(\d+)')
+
+    df_new.Valencia_wind_deg  = pd.to_numeric(df_new.Valencia_wind_deg)
+
+    df_new.Seville_pressure = df_new.Seville_pressure.str.extract('(\d+)')
+
+    df_new.Seville_pressure = pd.to_numeric(df_new.Seville_pressure)
+
+    df_new = df_new.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
+
+    # Convert the json string to a python dictionary object
 
     # ---------------------------------------------------------------
     # NOTE: You will need to swap the lines below for your own data
@@ -58,10 +84,10 @@ def _preprocess_data(data):
     # ---------------------------------------------------------------
 
     # ----------- Replace this code with your own preprocessing steps --------
-    predict_vector = feature_vector_df[['Madrid_wind_speed','Bilbao_rain_1h','Valencia_wind_speed']]
+
     # ------------------------------------------------------------------------
 
-    return predict_vector
+    return df_new
 
 def load_model(path_to_model:str):
     """Adapter function to load our pretrained model into memory.
@@ -82,7 +108,7 @@ def load_model(path_to_model:str):
     return pickle.load(open(path_to_model, 'rb'))
 
 
-""" You may use this section (above the make_prediction function) of the python script to implement 
+""" You may use this section (above the make_prediction function) of the python script to implement
     any auxiliary functions required to process your model's artifacts.
 """
 
