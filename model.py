@@ -48,30 +48,15 @@ def _preprocess_data(data):
     # Load the dictionary as a Pandas DataFrame.
     feature_vector_df = pd.DataFrame.from_dict([feature_vector_dict])
 
-    df_new = feature_vector_df
+    X = feature_vector_df
 
-    df_new['Valencia_pressure'] = df_new['Valencia_pressure'].fillna(df_new['Valencia_pressure'].mean())
 
-    df_new['Year']  = df_new['time'].astype('datetime64').dt.year
-    df_new['Month_of_year']  = df_new['time'].astype('datetime64').dt.month
-    df_new['Week_of_year'] = df_new['time'].astype('datetime64').dt.weekofyear
-    df_new['Day_of_year']  = df_new['time'].astype('datetime64').dt.dayofyear
-    df_new['Day_of_month']  = df_new['time'].astype('datetime64').dt.day
-    df_new['Day_of_week'] = df_new['time'].astype('datetime64').dt.dayofweek
-    df_new['Hour_of_week'] = ((df_new['time'].astype('datetime64').dt.dayofweek) * 24 + 24) - (24 - df_new['time'].astype('datetime64').dt.hour)
-    df_new['Hour_of_day']  = df_new['time'].astype('datetime64').dt.hour
 
-    df_new.time = pd.to_datetime(df_new.time)
 
-    df_new.Valencia_wind_deg = df_new.Valencia_wind_deg.str.extract('(\d+)')
 
-    df_new.Valencia_wind_deg  = pd.to_numeric(df_new.Valencia_wind_deg)
 
-    df_new.Seville_pressure = df_new.Seville_pressure.str.extract('(\d+)')
 
-    df_new.Seville_pressure = pd.to_numeric(df_new.Seville_pressure)
 
-    df_new = df_new.drop(columns=['Week_of_year','Day_of_year','Hour_of_week', 'Unnamed: 0','time'])
 
     # Convert the json string to a python dictionary object
 
@@ -87,7 +72,7 @@ def _preprocess_data(data):
 
     # ------------------------------------------------------------------------
 
-    return df_new
+    return X
 
 def load_model(path_to_model:str):
     """Adapter function to load our pretrained model into memory.
